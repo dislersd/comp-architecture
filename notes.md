@@ -64,6 +64,23 @@ in binary (base 2)
 0b1111 = 15 in decimal
 1 + 2 + 4 + 8
 
+0x means hex
+
 0xF = 15 in hexidecimal
 
+To convert binary to hex split up binary into "nibbles" (4 digits)
+
+0b 1010 0100
+0x  A    4
+
+0b10100100 = 0xA4
+
+0x  C     8
+0b 1100 1000
+
+0b111111 always a power of 2 minus 1
+
+
+0b 1111 1111 = 255  (largest number you can fit in a byte)
+0x  F    F
 
