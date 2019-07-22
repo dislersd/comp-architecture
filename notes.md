@@ -78,7 +78,10 @@ To convert binary to hex split up binary into "nibbles" (4 digits)
 0x  C     8
 0b 1100 1000
 
-0b111111 always a power of 2 minus 1
+0b11111111 always a power of 2 minus 1
+
+2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 = 256
+256 - 1 = 0b11111111 
 
 
 0b 1111 1111 = 255  (largest number you can fit in a byte)
