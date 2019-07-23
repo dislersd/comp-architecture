@@ -12,7 +12,7 @@ class CPU:
         # 8 general purpose registers
         # Also add properties for any internal registers you need, e.g. PC.
 
-        self.pc = 0  # Program Counter, points to current executing instruction
+        self.PC = 0  # Program Counter, points to current executing instruction
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.HLT = 0b00000001
@@ -33,6 +33,8 @@ class CPU:
         * R6 is reserved as the interrupt status (IS)
         * R7 is reserved as the stack pointer (SP)
         '''
+    # Memory Address Register
+    # Memory Data Register
 
     def ram_read(self, MAR):
         return self.ram[MAR]
@@ -43,13 +45,13 @@ class CPU:
     def load(self):
         """Load a program into memory."""
 
-        self.pc = 0
+        self.PC = 0
 
         # For now, we've just hardcoded a program:
 
         program = [
             # From print8.ls8
-            0b10000010,  # LDI R0,8 opcode
+            0b10000010,  # LDI R0,8 oPCode
             0b00000000,
             0b00001000,  # operand (8)
             0b01000111,  # PRN R0
@@ -58,8 +60,8 @@ class CPU:
         ]
 
         for instruction in program:
-            self.reg[self.pc] = instruction
-            self.pc += 1
+            self.ram[self.PC] = instruction
+            self.PC += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -77,12 +79,12 @@ class CPU:
         """
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
-            self.pc,
+            self.PC,
             # self.fl,
             # self.ie,
-            self.ram_read(self.pc),
-            self.ram_read(self.pc + 1),
-            self.ram_read(self.pc + 2)
+            self.ram_read(self.PC),
+            self.ram_read(self.PC + 1),
+            self.ram_read(self.PC + 2)
         ), end='')
 
         for i in range(8):
@@ -94,35 +96,36 @@ class CPU:
         """Run the CPU."""
 
         running = True
-        self.pc = 0
+        self.PC = 0
+        
         while running:
-            IR = self.reg[self.pc]
+            IR = self.ram[self.PC]
 
             if IR == self.HLT:
                 running = False
-                self.pc += 1
-            
+                self.PC += 1
+
             elif IR == self.LDI:
-                self.ram_write(self.ram[self.pc], self.reg[self.pc])
+                self.reg[self.ram_read(self.PC + 1)] = self.ram_read(self.PC + 2)
+                self.PC += 3
+
+            elif IR == self.PRN:
+                print(self.reg[self.ram_read(self.PC + 1)])
+                self.PC += 2
+
+            elif IR == self.MUL:
+                
+
+            else:
+                print(f"unknown instruction {IR}")
+                sys.exit(1)
 
 
-            
-        # if len(sys.argv) != 2:
-        #     print(f"usage: {sys.argv[0]} filename")
-        #     sys.exit(1)
-
-        # try:
-        #     # with open(sys.argv[1]) as f:
-
-        #         # for line in f:
-        #         #     num = line.split('#', 1)[0]
-
-        #         #     if num.strip() == '':  # ignore comment only lines
-        #         #         continue
-
-        #             self.ram[self.pc] = int(num)
-        #             self.pc += 1
-
-        # except FileNotFoundError:
-        #     print(f"{sys.argv[0]}: {sys.argv[1]} not found")
-        #     sys.exit(2)
+'''
+0b10000010,  # LDI R0,8 oPCode
+0b00000000,
+0b00001000,  # operand (8)
+0b01000111,  # PRN R0
+0b00000000,
+0b00000001
+'''
