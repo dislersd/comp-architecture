@@ -1,0 +1,9 @@
+# My program
+1   # PRINT_DYL
+
+4   # SAVE REGISTER 77, 2
+13  # store 77
+2   # in register 2
+5   # PRINT_REGISTER 2
+2   # Print value in register 2
+2   # HALT

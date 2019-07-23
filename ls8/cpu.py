@@ -2,6 +2,7 @@
 
 import sys
 
+
 class CPU:
     """Main CPU class."""
 
@@ -11,10 +12,13 @@ class CPU:
         # 8 general purpose registers
         # Also add properties for any internal registers you need, e.g. PC.
 
-        self.PC = 0 # Program Counter, points to current executing instruction
-        # self.memory = [0] * 256
+        self.pc = 0  # Program Counter, points to current executing instruction
         self.ram = [0] * 256
-        self.register = [0] * 8
+        self.reg = [0] * 8
+        self.HLT = 0b00000001
+        self.LDI = 0b10000010
+        self.PRN = 0b01000111
+        self.MUL = 0b10100010
 
         '''
         Internal Registers
@@ -30,41 +34,39 @@ class CPU:
         * R7 is reserved as the stack pointer (SP)
         '''
 
-    def ram_read(self, address):
-        return address
-        pass
+    def ram_read(self, MAR):
+        return self.ram[MAR]
 
-    def ram_write(self):
-        pass
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
 
     def load(self):
         """Load a program into memory."""
 
-        address = 0
+        self.pc = 0
 
         # For now, we've just hardcoded a program:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8 opcode
+            0b10000010,  # LDI R0,8 opcode
             0b00000000,
-            0b00001000, # operand (8)
-            0b01000111, # PRN R0
+            0b00001000,  # operand (8)
+            0b01000111,  # PRN R0
             0b00000000,
-            0b00000001, # HLT
+            0b00000001,  # HLT
         ]
 
         for instruction in program:
-            self.ram[address] = instruction
-            address += 1
-
+            self.reg[self.pc] = instruction
+            self.pc += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        # elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -76,8 +78,8 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
-            #self.ie,
+            # self.fl,
+            # self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
             self.ram_read(self.pc + 2)
@@ -90,4 +92,37 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+
+        running = True
+        self.pc = 0
+        while running:
+            IR = self.reg[self.pc]
+
+            if IR == self.HLT:
+                running = False
+                self.pc += 1
+            
+            elif IR == self.LDI:
+                self.ram_write(self.ram[self.pc], self.reg[self.pc])
+
+
+            
+        # if len(sys.argv) != 2:
+        #     print(f"usage: {sys.argv[0]} filename")
+        #     sys.exit(1)
+
+        # try:
+        #     # with open(sys.argv[1]) as f:
+
+        #         # for line in f:
+        #         #     num = line.split('#', 1)[0]
+
+        #         #     if num.strip() == '':  # ignore comment only lines
+        #         #         continue
+
+        #             self.ram[self.pc] = int(num)
+        #             self.pc += 1
+
+        # except FileNotFoundError:
+        #     print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+        #     sys.exit(2)
