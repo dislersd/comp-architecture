@@ -1,8 +1,21 @@
-# My program
-1   # PRINT_DYL
-4   # SAVE REGISTER 13, 2
-13  # store 13
-2   # in register 2
-5   # PRINT_REGISTER 2
-2   # Print value in register 2
-2   # HALT
+
+
+4
+99
+2
+4
+88
+1
+6
+2
+6
+1
+7
+3
+5
+3
+7
+4
+5
+4
+2

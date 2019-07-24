@@ -5,11 +5,14 @@ HALT = 2
 PRINT_NUM = 3
 SAVE_REGISTER = 4
 PRINT_REGISTER = 5
+PUSH = 6
+POP = 7
 
 memory = [0] * 128
 
 register = [0] * 8  # 8 registers
 
+SP = 7
 pc = 0  # Program counter, points to currently-executing instruction
 
 running = True
@@ -35,6 +38,8 @@ except FileNotFoundError:
     print(f"{sys.argv[0]}: {sys.argv[1]} not found")
     sys.exit(2)
 
+
+register[SP] = 127 # (Top of memory) for ls-8 its 255 i think
 
 while running:
     command = memory[pc]
@@ -62,6 +67,20 @@ while running:
     elif command == HALT:
         running = False
         pc += 1
+
+    elif command == PUSH:
+        register[SP] -= 1               # decrement SP
+        regnum = memory[pc + 1]         # get the reg num operand
+        value = register[regnum]        # get the value from that reg
+        memory[register[SP]] = value    # store that value in memory at the SP
+        pc += 2
+
+    elif command == POP:
+        value = memory[register[SP]]
+        regnum = memory[pc + 1]
+        register[regnum] = value
+        register[SP] += 1
+        pc += 2
 
     else:
         print(f"unknown instruction {command}")

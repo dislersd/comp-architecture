@@ -47,21 +47,25 @@ class CPU:
 
         self.PC = 0
 
-        # For now, we've just hardcoded a program:
+        if len(sys.argv) != 2:
+            print(f"usage: {sys.argv[0]} filename")
+            sys.exit(1)
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8 oPCode
-            0b00000000,
-            0b00001000,  # operand (8)
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        try:
+            with open(sys.argv[1]) as f:
+                for line in f:
+                    num = line.split('#', 1)[0]
 
-        for instruction in program:
-            self.ram[self.PC] = instruction
-            self.PC += 1
+                    if num.strip() == '':  # ignore comment only lines
+                        continue
+
+                    num = int(num, 2)
+                    self.ram[self.PC] = num
+                    self.PC += 1
+
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -69,6 +73,10 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+
+        elif op == "MUL":
+            self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -97,7 +105,7 @@ class CPU:
 
         running = True
         self.PC = 0
-        
+
         while running:
             IR = self.ram[self.PC]
 
@@ -106,7 +114,8 @@ class CPU:
                 self.PC += 1
 
             elif IR == self.LDI:
-                self.reg[self.ram_read(self.PC + 1)] = self.ram_read(self.PC + 2)
+                self.reg[self.ram_read(self.PC + 1)
+                         ] = self.ram_read(self.PC + 2)
                 self.PC += 3
 
             elif IR == self.PRN:
@@ -114,7 +123,8 @@ class CPU:
                 self.PC += 2
 
             elif IR == self.MUL:
-                
+                self.alu('MUL', self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
+                self.PC += 3
 
             else:
                 print(f"unknown instruction {IR}")
