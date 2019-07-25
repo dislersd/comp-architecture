@@ -19,10 +19,12 @@ class CPU:
         self.LDI = 0b10000010
         self.PRN = 0b01000111
         self.MUL = 0b10100010
-        self.PUSH = 0x45
-        self.POP = 0x46
+        self.ADD = 0b10100000
         self.SP = 0b00000111
-
+        self.PUSH = 0b01000101
+        self.POP = 0b01000110
+        self.CALL = 0b01010000
+        self.RET = 0b00010001
 
         '''
         Internal Registers
@@ -37,9 +39,9 @@ class CPU:
         * R6 is reserved as the interrupt status (IS)
         * R7 is reserved as the stack pointer (SP)
         '''
+
     # Memory Address Register
     # Memory Data Register
-
     def ram_read(self, MAR):
         return self.ram[MAR]
 
@@ -75,8 +77,7 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+            self.reg[reg_a] =  self.reg[reg_a] + self.reg[reg_b]
 
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
@@ -109,8 +110,7 @@ class CPU:
 
         running = True
         self.PC = 0
-        self.reg[self.SP] = 0xff
-
+        self.reg[self.SP] = 0b11111111
         while running:
             IR = self.ram[self.PC]
 
@@ -128,7 +128,13 @@ class CPU:
                 self.PC += 2
 
             elif IR == self.MUL:
-                self.alu('MUL', self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
+                self.alu('MUL', self.ram_read(self.PC + 1),
+                         self.ram_read(self.PC + 2))
+                self.PC += 3
+
+            elif IR == self.ADD:
+                self.alu('ADD', self.ram_read(self.PC + 1),
+                         self.ram_read(self.PC + 2))
                 self.PC += 3
 
             elif IR == self.PUSH:
@@ -144,6 +150,19 @@ class CPU:
                 self.reg[regnum] = value
                 self.reg[self.SP] += 1
                 self.PC += 2
+
+            elif IR == self.CALL:
+                return_addr = self.PC + 2
+                self.reg[self.SP] -= 1
+                self.ram[self.reg[self.SP]] = return_addr
+                regnum = self.ram[self.PC + 1] # 1
+                subroutine_addr = self.reg[regnum]
+                self.PC = subroutine_addr
+
+            elif IR == self.RET:
+                return_addr = self.ram[self.reg[self.SP]]
+                self.reg[self.SP] += 1
+                self.PC = return_addr
 
             else:
                 print(f"unknown instruction {IR}")
