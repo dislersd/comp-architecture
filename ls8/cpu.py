@@ -19,6 +19,10 @@ class CPU:
         self.LDI = 0b10000010
         self.PRN = 0b01000111
         self.MUL = 0b10100010
+        self.PUSH = 0x45
+        self.POP = 0x46
+        self.SP = 0b00000111
+
 
         '''
         Internal Registers
@@ -105,6 +109,7 @@ class CPU:
 
         running = True
         self.PC = 0
+        self.reg[self.SP] = 0xff
 
         while running:
             IR = self.ram[self.PC]
@@ -125,6 +130,20 @@ class CPU:
             elif IR == self.MUL:
                 self.alu('MUL', self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
                 self.PC += 3
+
+            elif IR == self.PUSH:
+                self.reg[self.SP] -= 1
+                regnum = self.ram[self.PC + 1]
+                value = self.reg[regnum]
+                self.ram[self.reg[self.SP]] = value
+                self.PC += 2
+
+            elif IR == self.POP:
+                value = self.ram[self.reg[self.SP]]
+                regnum = self.ram[self.PC + 1]
+                self.reg[regnum] = value
+                self.reg[self.SP] += 1
+                self.PC += 2
 
             else:
                 print(f"unknown instruction {IR}")
