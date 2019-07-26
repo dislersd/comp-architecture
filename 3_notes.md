@@ -26,8 +26,12 @@
 * Temporarily store information
 * Clears up space on the registers for them to keep working
 * Stores local variables
+* Keeping track of numbers you need later but you ran out of registers to hold them in
+* 
 
-## 
+## Registers
 
 * What can general purpose register do that internal register cannot do?
+    - They can hold varied data like operands and allow you to write extra functionality
     - Theres no instruction that can change the PC directly
+    - Special Purpose registers have one task like pointing to the program, but you don't

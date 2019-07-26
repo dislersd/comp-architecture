@@ -20,6 +20,9 @@ class CPU:
         self.PRN = 0b01000111
         self.MUL = 0b10100010
         self.ADD = 0b10100000
+        self.CMP = 0b10100111
+        self.JMP = 0b01010100
+        self.FL = 0b00000000
         self.SP = 0b00000111
         self.PUSH = 0b01000101
         self.POP = 0b01000110
@@ -81,6 +84,16 @@ class CPU:
 
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+
+        elif op =="CMP":
+            # FL = 00000LGE
+            if self.reg[reg_a] < self.reg[reg_b]:
+                self.FL = 0b00000100 # "L" set to 1
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.FL = 0b00000010 # "G" set to 1
+            elif self.reg[reg_a] == self.reg[reg_b]:
+                self.FL = 0b00000001 # "E" set tp 1
+
 
         else:
             raise Exception("Unsupported ALU operation")
@@ -163,6 +176,7 @@ class CPU:
                 return_addr = self.ram[self.reg[self.SP]]
                 self.reg[self.SP] += 1
                 self.PC = return_addr
+
 
             else:
                 print(f"unknown instruction {IR}")
