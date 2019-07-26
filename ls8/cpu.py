@@ -22,6 +22,8 @@ class CPU:
         self.ADD = 0b10100000
         self.CMP = 0b10100111
         self.JMP = 0b01010100
+        self.JEQ = 0b01010101
+        self.JNE = 0b01010110
         self.FL = 0b00000000
         self.SP = 0b00000111
         self.PUSH = 0b01000101
@@ -85,7 +87,7 @@ class CPU:
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
 
-        elif op =="CMP":
+        elif op == "CMP":
             # FL = 00000LGE
             if self.reg[reg_a] < self.reg[reg_b]:
                 self.FL = 0b00000100 # "L" set to 1
@@ -124,6 +126,7 @@ class CPU:
         running = True
         self.PC = 0
         self.reg[self.SP] = 0b11111111
+
         while running:
             IR = self.ram[self.PC]
 
@@ -177,14 +180,37 @@ class CPU:
                 self.reg[self.SP] += 1
                 self.PC = return_addr
 
+            elif IR == self.CMP:
+                self.alu("CMP", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
+                self.PC += 3
 
+            elif IR == self.JMP:
+                memory_addr = self.ram[self.PC + 1]
+                self.PC = self.reg[memory_addr]
+
+            elif IR == self.JEQ:
+                if self.FL == 0b00000001:
+                    memory_addr = self.ram[self.PC + 1]
+                    self.PC = self.reg[memory_addr]
+                else:
+                    self.PC += 2
+
+            elif IR == self.JNE:
+                if self.FL != 0b00000001:
+                    memory_addr = self.ram[self.PC + 1]
+                    self.PC = self.reg[memory_addr]
+                else:
+                    self.PC += 2
+                    
             else:
                 print(f"unknown instruction {IR}")
                 sys.exit(1)
 
+                10100111
+
 
 '''
-0b10000010,  # LDI R0,8 oPCode
+0b10000010,  # LDI R0,8 opCode
 0b00000000,
 0b00001000,  # operand (8)
 0b01000111,  # PRN R0

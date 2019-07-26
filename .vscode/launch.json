@@ -11,7 +11,7 @@
             "program": "${file}",
             "cwd": "${workspaceFolder}/ls8",
             "console": "integratedTerminal",
-            "args": ["examples/call.ls8"]
+            "args": ["examples/sprint.ls8"]
         }
     ]
 }
